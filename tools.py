@@ -1,7 +1,7 @@
 # Functions to be used as agent's tools
 import subprocess # To make bash command executions
 from ddgs import DDGS # to make DuckDuckGo searches
-from output import printTool, printError
+from agentIO import printTool, printError
 import config
 
 def log_tool_usage(tool_name: str, message: str):

@@ -1,8 +1,9 @@
 from ollama import Client
 from tools import web_search, create_file, read_file, list_folder
-from output import printThinking, printError, printSystem, printResponse
+from agentIO import printThinking, printError, printSystem, printResponse
 import config
 import re
+import os
 
 # LLM client
 client = Client(
@@ -14,7 +15,7 @@ client = Client(
 defined_tools = [web_search, create_file, read_file, list_folder]
 
 # agent loop
-def agent_loop(prompt: str, messages_bag = []):
+def agent_loop(prompt: str, messages_bag: list = []):
     printThinking(f"Agent loop started, please wait...")
 
     # First of all, check if there is any context required (with @)
@@ -25,7 +26,10 @@ def agent_loop(prompt: str, messages_bag = []):
     printThinking("Thinking...")
 
     # 1. Inicial history
-    messages_bag.append({"role": "user", "content": prompt})
+    messages_bag.append({
+        "role": "user",
+        "content": prompt
+    })
     
     # limit to prevent infinite loop
 
@@ -64,6 +68,8 @@ def agent_loop(prompt: str, messages_bag = []):
             # Exect the tool
             result = ""
             match tool_call.function.name:
+                case 'load_skill':
+                    messages_bag = load_skill(messages_bag = messages_bag, **args)
                 case 'list_folder':
                     result = list_folder(**args)
                 case 'web_search':
@@ -76,12 +82,13 @@ def agent_loop(prompt: str, messages_bag = []):
                     # Unknown tool
                     continue
                 
-            # 5. Add the result to the message history
-            messages_bag.append({
-                "role": "tool",
-                "name": tool_name,
-                "content": str(result)
-            })
+            # 5. Add the result to the message history if not empty
+            if result != "":
+                messages_bag.append({
+                    "role": "tool",
+                    "name": tool_name,
+                    "content": str(result)
+                })
             
         # loop end (will finish if no more tool calls or MAX_ITERATIONS reached
 
@@ -99,17 +106,35 @@ def extract_required_context_items(prompt: str) -> list:
     pattern = r"@'(\S+)'"
     return re.findall(pattern, prompt)
 
-def resolve_context(prompt: str, messages_bag: list, require_context: list):
-    printThinking(f"Resolving context items...")
-    for c in require_context:
-        string_to_remove = "@'" + c + "'"
-        prompt = prompt.replace(string_to_remove, "")
-        temp = c.partition(":")
-        match temp[0]:
-            case 'agent':
-                continue
-            case 'skill':
-                continue
-            case 'file':
-                continue
+def load_skill(messages_bag: list, skill: str) -> list:
+    with open(skill, 'r', encoding='utf-8') as f:
+        file_content = f.read()
+        messages_bag.append({
+            "role": "user",
+            "content": f"<skill>\n{file_content}</skill>\n"
+        })
+    return messages_bag
+
+def resolve_context(prompt, messages_bag, required_context) -> list:
+    for r in required_context:
+        c = r.partition(":")
+        match c[0]:
+            case 'file'|'skill':
+                messages_bag = load_context_file(c[0], c[1], messages_bag)
+        prompt = prompt.replace(f"@'{r}'", "")
+
     return prompt, messages_bag
+
+
+def load_context_file(tag: str, filename: str, messages_bag: list) -> list:
+    if os.path.exists(filename) != True:
+        printError(f"The required file cannot be found: {filename}")
+    else:
+        with open(filename, 'r', encoding='utf-8') as f:
+            file_content = f.read()
+            messages_bag.append({
+                "role": "user",
+                "content": f"<{tag}>\n{file_content}</{tag}>\n"
+            })
+    
+    return messages_bag

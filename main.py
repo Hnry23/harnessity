@@ -1,8 +1,7 @@
 from agent import agent_loop, count_tokens
-from output import printError
+from agentIO import printError, inputPrompt, printSystem
 
-print("AI agent")
-print("========")
+printSystem("\nAI agent\n========\n")
 
 loop = True
 message_history = []
@@ -10,7 +9,7 @@ last_response = None
 
 while loop:
     prompt = None
-    prompt = str(input(">>> ")).strip()
+    prompt = inputPrompt()
 
     if prompt == None:
         continue
@@ -40,4 +39,4 @@ while loop:
     # If we reach this point we will treat it like a normal prompt
     last_response, message_history = agent_loop(prompt, message_history)
 
-print("Bye!\n")
+printSystem("\nBye!\n")

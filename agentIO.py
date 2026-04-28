@@ -23,3 +23,6 @@ def printThinking(message: str):
 def printTool(message: str):
     print(Fore.YELLOW + message)
     Fore.RESET
+
+def inputPrompt() -> str:
+    return str(input(Fore.YELLOW + ">>> ")).strip()
