@@ -8,7 +8,7 @@
         }
     },
     "agent": {
-        "show_thinking": true
+        "show_thinking": false
     },
     "tools": {
         "show_usage": true,

@@ -21,7 +21,7 @@ def printThinking(message: str):
     Fore.RESET
 
 def printTool(message: str):
-    print(Fore.YELLOW + message)
+    print(Fore.LIGHTWHITE_EX + message)
     Fore.RESET
 
 def inputPrompt() -> str:

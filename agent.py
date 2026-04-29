@@ -22,8 +22,6 @@ class Agent:
         required_context = self.extract_required_context_items(prompt)
         prompt, messages_bag = self.resolve_context(prompt, messages_bag, required_context)
 
-        printThinking("Thinking...")
-
         # 1. Inicial history
         messages_bag.append({
             "role": "user",
