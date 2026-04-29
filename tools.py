@@ -2,10 +2,10 @@
 import subprocess # To make bash command executions
 from ddgs import DDGS # to make DuckDuckGo searches
 from agentIO import printTool, printError
-import config
+from config import config
 
 def log_tool_usage(tool_name: str, message: str):
-    if config.show_tool_usage:
+    if config.tools.show_usage:
         printTool(f"\n[Tool] {tool_name} :: {message}")
 
 def create_file(file_name: str, content: str):
@@ -33,11 +33,11 @@ def read_file(file_name: str):
         return f"There was an error reading the file: {e}"
         
 
-def web_search(query: str, max_results_to_return: int = config.websearch_max_results) -> str:
+def web_search(query: str, max_results_to_return: int = config.tools.websearch_max_results) -> str:
     """
     Find on the Internet updated information about any topic.
     Useful for recent news of topics the model does not know.
-    Use a higher value in max_results_to_return (default is 3) param to return more results in case a first call was not enough
+    Use a higher value in max_results_to_return param to return more results in case a first call was not enough
     """
     log_tool_usage("web_search", f"I am searching the web: {query} with max {max_results_to_return} results...")
     with DDGS() as ddgs:

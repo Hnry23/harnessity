@@ -1,0 +1,17 @@
+{
+    "model": {
+        "provider": "ollama",
+        "host": "http://192.168.1.95:11434",
+        "name": "gemma4:custom",
+        "headers": {
+            "x-some-header": "some-value"
+        }
+    },
+    "agent": {
+        "show_thinking": true
+    },
+    "tools": {
+        "show_usage": true,
+        "websearch_max_results": 5
+    }
+}

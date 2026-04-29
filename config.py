@@ -1,16 +1,66 @@
-# Model
-model_host = 'http://192.168.1.95:11434'
-model_name = 'gemma4:custom'
-model_headers = {'x-some-header': 'some-value'}
+import json
+import os
+import sys
+from types import SimpleNamespace
 
-# Agent
-show_thinking = True # Show/hide the thinking process
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'config.json')
 
-# Tool
-show_tool_usage = True # prints a line everytime a tool is being used
-websearch_max_results = 5 # default value, can be overriden by the model
+MANDATORY_SETTINGS = [
+    "model.host",
+    "model.name",
+    "model.headers",
+    "model.provider",
+    "agent.show_thinking",
+    "tools.show_usage",
+    "tools.websearch_max_results"
+]
 
-# System prompt
-system_prompt = '"""' \
-'' \
-'"""'
+def dict_to_namespace(data, key_name=""):
+    """
+    Recursively converts dictionaries into SimpleNamespace objects,
+    but keeps 'headers' as a regular dictionary for library compatibility.
+    """
+    if isinstance(data, dict):
+        # We check if the current key is 'headers' to keep it as a dict
+        if key_name == "headers":
+            return data
+        return SimpleNamespace(**{k: dict_to_namespace(v, k) for k, v in data.items()})
+    return data
+
+def validate_settings(data):
+    """Checks if all mandatory settings are present in the loaded dictionary."""
+    for setting in MANDATORY_SETTINGS:
+        keys = setting.split('.')
+        temp = data
+        for key in keys:
+            if isinstance(temp, dict) and key in temp:
+                temp = temp[key]
+            else:
+                print(f"❌ ERROR: Missing mandatory setting: '{setting}'")
+                sys.exit(1)
+
+def load_config():
+    """Loads, validates, and transforms the JSON config into an object."""
+    if not os.path.exists(CONFIG_PATH):
+        print(f"❌ ERROR: Configuration file not found at: {CONFIG_PATH}")
+        sys.exit(1)
+
+    try:
+        with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+            # Validate before converting to object
+            validate_settings(data)
+            
+            # Convert to namespace but preserving dictionaries where needed
+            return dict_to_namespace(data)
+            
+    except json.JSONDecodeError as e:
+        print(f"❌ ERROR: 'config.json' has invalid syntax: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Unexpected ERROR loading config: {e}")
+        sys.exit(1)
+
+# Initialize the global config object
+config = load_config()
