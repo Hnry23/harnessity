@@ -26,6 +26,7 @@ def read_file(file_name: str):
     Read a file.
     """
     try:
+        log_tool_usage("read_file", f"Reading file: {file_name}...")
         with open(file_name) as f:
             return str(f.read())
     except Exception as e:

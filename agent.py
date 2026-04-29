@@ -130,3 +130,17 @@ class Agent:
                 })
         
         return messages_bag
+
+    @staticmethod
+    def set_agent_definition(agent_name: str, messages_bag: list) -> tuple[bool, list]:
+        filename = "./agents/" + agent_name + ".md"
+        if os.path.exists(filename) != True:
+            printError(f"The required agent definition cannot be found: {agent_name}")
+            return False, messages_bag
+        with open(filename, 'r', encoding='utf-8') as f:
+            file_content = f.read()
+            messages_bag.append({
+                "role": "system",
+                "content": file_content
+            })
+        return True, messages_bag
