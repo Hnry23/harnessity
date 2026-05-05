@@ -1,7 +1,8 @@
 from model import Model
-from tools import web_search, create_file, read_file, list_folder
+from agentTools import web_search, create_file, read_file, list_folder
 from agentIO import printThinking, printError, printSystem, printResponse
 from config import config
+from agentMCP import executeMCPTool
 import re
 import os
 
@@ -57,23 +58,27 @@ class Agent:
             for tool_call in msg.tool_calls:
                 tool_name = tool_call.function.name
                 args = tool_call.function.arguments
-                
-                # Exect the tool
+
+                # Execute the MCP tool (if is a MCP request)
                 result = ""
-                match tool_call.function.name:
-                    case 'load_skill':
-                        messages_bag = self.load_skill(messages_bag = messages_bag, **args)
-                    case 'list_folder':
-                        result = list_folder(**args)
-                    case 'web_search':
-                        result = web_search(**args)
-                    case 'create_file':
-                        result = create_file(**args)
-                    case 'read_file':
-                        result = read_file(**args)
-                    case _:
-                        # Unknown tool
-                        continue
+                if tool_name.startswith("mcp_"):
+                    result = executeMCPTool(mcpName="lala", toolName="lolo", **args)
+                else:
+                    # Execute the tool
+                    match tool_call.function.name:
+                        case 'load_skill':
+                            messages_bag = self.load_skill(messages_bag = messages_bag, **args)
+                        case 'list_folder':
+                            result = list_folder(**args)
+                        case 'web_search':
+                            result = web_search(**args)
+                        case 'create_file':
+                            result = create_file(**args)
+                        case 'read_file':
+                            result = read_file(**args)
+                        case _:
+                            # Unknown tool
+                            continue
                     
                 # 5. Add the result to the message history if not empty
                 if result != "":

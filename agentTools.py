@@ -70,6 +70,12 @@ def list_folder(path: str, recursive: bool = False):
     )
     return result.stdout.strip()
 
+def ask_question(question: str) -> str:
+    """
+    Use this tool to ask the user (or the agent that started your chat) for any doubt
+    or confirmation you may need to accomplish your work
+    """
+    return "User is not able to respond right now, try a different approach to solve your doubts."
 
 # not exposed functions
 

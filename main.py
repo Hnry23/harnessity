@@ -2,7 +2,8 @@ from model import Model
 from agent import Agent
 from agentIO import printError, inputPrompt, printSystem
 from config import config
-import tools
+from agentMCP import initConfiguredMCP, getMCPTools
+import agentTools
 
 printSystem("\nAI agent\n========\n")
 
@@ -16,11 +17,15 @@ model = Model(
 
 # Defined tools
 defined_tools = [
-    tools.web_search,
-    tools.create_file,
-    tools.read_file,
-    tools.list_folder
+    agentTools.web_search,
+    agentTools.create_file,
+    agentTools.read_file,
+    agentTools.list_folder
 ]
+
+# MCP tools
+initConfiguredMCP()
+defined_tools.extend(getMCPTools())
 
 main_agent = Agent(model, defined_tools)
 

@@ -12,7 +12,8 @@ MANDATORY_SETTINGS = [
     "model.provider",
     "agent.show_thinking",
     "tools.show_usage",
-    "tools.websearch_max_results"
+    "tools.websearch_max_results",
+    "mcp.servers"
 ]
 
 def dict_to_namespace(data, key_name=""):
