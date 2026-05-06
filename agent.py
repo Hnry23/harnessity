@@ -9,7 +9,6 @@ import os
 class Agent:
 
     def __init__(self, model: Model, defined_tools: list):
-
         self.defined_tools = defined_tools
         self.model = model
         self.client = model.getClient()
@@ -23,7 +22,7 @@ class Agent:
         required_context = self.extract_required_context_items(prompt)
         prompt, messages_bag = self.resolve_context(prompt, messages_bag, required_context)
 
-        # 0. before start
+        # 0. keep original messages before starting (just in case)
         original_messages_bag = messages_bag
 
         # 1. Inicial history
@@ -33,9 +32,7 @@ class Agent:
         })
         
         # limit to prevent infinite loop
-
         MAX_ITERATIONS = 10
-        
         for _ in range(MAX_ITERATIONS):
             # 2. Call the LLM
             try:
@@ -50,60 +47,68 @@ class Agent:
             msg = response.message
             messages_bag.append(msg) # append always the assistant response
 
+            # Stop reason handling
+            stop_reason = getattr(response, 'stop_reason', None)
+            if stop_reason == "max_tokens":
+                printError("Warning: Context window or output limit reached (max_tokens).")
+                return None, messages_bag
+            if stop_reason == "content_filter":
+                printError("Warning: The response was blocked by content filters.")
+                return None, messages_bag
+
             if config.agent.show_thinking and msg.role == 'assistant':
                 if msg.thinking != '':
                     printThinking(f"{msg.thinking}")
                     if msg.content != '':
                         printThinking(f"{msg.content}")
 
-            # 3. If no more tool calls, the agent finished thinking (we break the loop)
-            if not msg.tool_calls:
+            # 3. If end turn or no more tool calls, the agent finished thinking (we break the loop)
+            if stop_reason == "end_turn" or not msg.tool_calls:
                 printResponse(msg.content)
                 return None, messages_bag
 
-            # 4. Process 
+            # 4. Process tool calling (mcp and local tools)
             for tool_call in msg.tool_calls:
                 tool_name = tool_call.function.name
                 args = tool_call.function.arguments
 
                 # Execute the MCP tool (if is a MCP request)
-                result = ""
-                if tool_name.startswith("mcp|"):
-                    parts = tool_name[4:].split("|", 1)
-                    if len(parts) == 2:
-                        mcp_name_real, tool_name_real = parts
-                        result = executeMCPTool(mcpName=mcp_name_real, toolName=tool_name_real, **args)
-                    else:
-                        result = "Error: The tool is not correctly named"
-                else:
-                    # Execute the tool
-                    match tool_call.function.name:
-                        case 'load_skill':
-                            messages_bag = self.load_skill(messages_bag = messages_bag, **args)
-                        case 'list_folder':
-                            result = list_folder(**args)
-                        case 'web_search':
-                            result = web_search(**args)
-                        case 'create_file':
-                            result = create_file(**args)
-                        case 'read_file':
-                            result = read_file(**args)
-                        case _:
-                            # Unknown tool
-                            continue
+                result = self.execute_tool(messages_bag=messages_bag, tool_name=tool_name, **args)
                     
-                # 5. Add the result to the message history if not empty
-                if result != "":
-                    messages_bag.append({
-                        "role": "tool",
-                        "name": tool_name,
-                        "content": str(result)
-                    })
-                
-            # loop end (will finish if no more tool calls or MAX_ITERATIONS reached
+                # 5. Add the result to the message history
+                messages_bag.append({
+                    "role": "tool",
+                    "name": tool_name,
+                    "content": str(result)
+                })
 
         printError("The max iteration limit was reached.")
         return response, messages_bag
+
+    def execute_tool(self, messages_bag: list, tool_name:str, **args) -> tuple[list, str]:
+        if tool_name.startswith("mcp|"):
+            parts = tool_name[4:].split("|", 1)
+            if len(parts) == 2:
+                mcp_name_real, tool_name_real = parts
+                result = executeMCPTool(mcpName=mcp_name_real, toolName=tool_name_real, **args)
+            else:
+                result = "Error: The tool is not correctly named"
+        else:
+            # Execute the tool
+            match tool_name:
+                case 'load_skill':
+                    messages_bag = self.load_skill(messages_bag = messages_bag, **args)
+                case 'list_folder':
+                    result = list_folder(**args)
+                case 'web_search':
+                    result = web_search(**args)
+                case 'create_file':
+                    result = create_file(**args)
+                case 'read_file':
+                    result = read_file(**args)
+                case _:
+                    result = "Tool not available"
+        return messages_bag, result
 
     def count_tokens(self, response):
         if hasattr(response, 'prompt_eval_count') and hasattr(response, 'eval_count'):
@@ -146,6 +151,15 @@ class Agent:
                     "content": f"<{tag}>\n{file_content}</{tag}>\n"
                 })
         
+        return messages_bag
+    
+    def prune_history(self, messages_bag: list, max_messages: int = 10) -> list:
+        # Keep the system prompts and last {max_messages} messages
+        if len(messages_bag) > max_messages:
+            printSystem(f"Cleaning history: Keeping last {max_messages} messages.")
+            system_prompt = [m for m in messages_bag if m['role'] == 'system']
+            recent_context = messages_bag[-(max_messages-len(system_prompt)):]
+            return system_prompt + recent_context
         return messages_bag
 
     @staticmethod
