@@ -23,6 +23,9 @@ class Agent:
         required_context = self.extract_required_context_items(prompt)
         prompt, messages_bag = self.resolve_context(prompt, messages_bag, required_context)
 
+        # 0. before start
+        original_messages_bag = messages_bag
+
         # 1. Inicial history
         messages_bag.append({
             "role": "user",
@@ -35,7 +38,11 @@ class Agent:
         
         for _ in range(MAX_ITERATIONS):
             # 2. Call the LLM
-            response = self.model.chat(messages_bag, self.defined_tools)
+            try:
+                response = self.model.chat(messages_bag, self.defined_tools)
+            except Exception as e:
+                printError(f"Error connecting to the model: {e}")
+                return original_messages_bag
             
             if hasattr(response, 'message') == False:
                 continue
@@ -52,7 +59,7 @@ class Agent:
             # 3. If no more tool calls, the agent finished thinking (we break the loop)
             if not msg.tool_calls:
                 printResponse(msg.content)
-                return response, messages_bag
+                return None, messages_bag
 
             # 4. Process 
             for tool_call in msg.tool_calls:
@@ -61,8 +68,13 @@ class Agent:
 
                 # Execute the MCP tool (if is a MCP request)
                 result = ""
-                if tool_name.startswith("mcp_"):
-                    result = executeMCPTool(mcpName="lala", toolName="lolo", **args)
+                if tool_name.startswith("mcp|"):
+                    parts = tool_name[4:].split("|", 1)
+                    if len(parts) == 2:
+                        mcp_name_real, tool_name_real = parts
+                        result = executeMCPTool(mcpName=mcp_name_real, toolName=tool_name_real, **args)
+                    else:
+                        result = "Error: The tool is not correctly named"
                 else:
                     # Execute the tool
                     match tool_call.function.name:
