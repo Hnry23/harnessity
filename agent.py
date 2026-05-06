@@ -31,9 +31,10 @@ class Agent:
             "content": prompt
         })
         
-        # limit to prevent infinite loop
-        MAX_ITERATIONS = 10
-        for _ in range(MAX_ITERATIONS):
+        for _ in range(config.agent.max_loop_iterations):
+            # Clean the history if needed
+            self.prune_history(messages_bag=messages_bag, max_messages=config.agent.max_messages)
+
             # 2. Call the LLM
             try:
                 response = self.model.chat(messages_bag, self.defined_tools)
@@ -125,7 +126,7 @@ class Agent:
         with open(skill, 'r', encoding='utf-8') as f:
             file_content = f.read()
             messages_bag.append({
-                "role": "user",
+                "role": "system",
                 "content": f"<skill>\n{file_content}</skill>\n"
             })
         return messages_bag

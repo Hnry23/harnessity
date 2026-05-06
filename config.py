@@ -10,6 +10,8 @@ MANDATORY_SETTINGS = [
     "model.name",
     "model.headers",
     "model.provider",
+    "agent.max_messages",
+    "agent.max_loop_iterations",
     "agent.show_thinking",
     "tools.show_usage",
     "tools.websearch_max_results",

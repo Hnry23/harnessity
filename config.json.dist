@@ -8,10 +8,23 @@
         }
     },
     "agent": {
-        "show_thinking": false
+        "show_thinking": true,
+        "max_messages": 20,
+        "max_loop_iterations": 15
     },
     "tools": {
         "show_usage": true,
         "websearch_max_results": 5
+    },
+    "mcp": {
+        "show_usage": true,
+        "servers": [
+            {
+                "name": "rag",
+                "protocol": "http",
+                "host": "localhost",
+                "port": 7777
+            }
+        ]
     }
 }
