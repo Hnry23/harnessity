@@ -1,5 +1,5 @@
-from config import config
-from agentIO import printTool, printError
+from harnessity.config import config
+from harnessity.agentIO import printTool, printError
 
 import asyncio
 from mcp import ClientSession

@@ -1,66 +1,108 @@
 # 🤖 Harnessity
 
-This project is an application designed to serve as a **harness and agent** that communicates with Large Language Models (LLMs) and provides them with tools and access to the real world to multiply their capabilities. It is designed to be a versatile platform extending beyond simple software development tasks.
+**Harnessity** is an experimental playground designed to explore the synergy between Large Language Models (LLMs) and the real world. This project acts as a **harness and agent** that provides LLMs with a set of tools to interact with your system, effectively multiplying their capabilities through a modular and extensible architecture.
+
+> [!IMPORTANT]  
+> This is a **purely educational and "just for fun" project**. It is built as a sandbox to experiment with agentic behaviors, tool-use, and the Model Context Protocol (MCP). It is not intended for production use, but rather as a creative way to see how far an LLM can go when given a "pair of hands" to interact with a computer.
 
 ## ✨ Features
 
-*   **LLM Agent:** A core system for orchestrating LLM interactions.
-*   **Tool Integration:** Agents can be equipped with built-in tools (e.g., web search, file operations) and dynamically extended via the Model Context Protocol (MCP) to interact with external servers.
-*   **Contextual Awareness:** The system supports loading context from files or skills to inform the agent's decisions.
-*   **Interactive CLI:** A command-line interface for interacting with the agent and managing the session.
+*   **LLM Agent:** A core system for orchestrating LLM interactions and reasoning loops.
+*   **Tool Integration:** Built-in tools (web search, file operations) and dynamic extension via the **Model Context Protocol (MCP)**.
+*   **Contextual Awareness:** Support for loading context from files or specific "skills" to guide the agent.
+*   **Interactive CLI:** A simple and fun command-line interface to manage your sessions and agents.
 
-## ⚙️ Project Structure & Setup
 
-The project is organized around several Python scripts that define the core components:
+## ⚙️ Project Structure
 
-*   `main.py`: The entry point of the application, which initializes the LLM client, the Agent, and runs the main command loop.
-*   `agent.py`: Contains the core logic for the `Agent` class, handling the LLM calls, tool execution, and the agent loop.
-*   `model.py`: Defines the `Model` class responsible for interfacing with the underlying LLM (e.g., Ollama).
-*   `agentIO.py`: Provides helper functions for standardized output (printing responses, errors, thinking states) and user input.
-*   `agentTools.py`: Defines the set of built-in external functions (tools) that the agent can call (e.g., `web_search`, `create_file`, `read_file`, `list_folder`).
-*   `agentMCP.py`: Handles Model Context Protocol (MCP) integration, allowing the agent to connect to external servers for additional tools.
-*   `config.json` / `config.json.dist`: Configuration files for setting up the LLM connection, agent parameters, and MCP servers.
-*   `skills/`: A directory where custom skills/context files can be stored.
+The application is organized into modular components:
 
-### 🚀 Setup Instructions
+*   `main.py`: Entry point. Initializes the LLM client, the Agent, and the command loop.
+*   `agent.py`: Core logic for the `Agent` class (reasoning loops and tool execution).
+*   `model.py`: Interface for underlying LLMs (e.g., Ollama, OpenAI).
+*   `agentIO.py`: Standardized input/output (UI, errors, and "thinking" states).
+*   `agentTools.py`: Built-in tools (`web_search`, `create_file`, `read_file`, `list_folder`).
+*   `agentMCP.py`: MCP integration for external tool servers.
+*   `config.json.dist`: Template for LLM connections and agent parameters.
+*   `skills/`: Directory for custom skills and context files.
 
-1.  **Configuration:** Before running the application, you must configure the system.
-    *   Copy the template file: **`config.json.dist`** to **`config.json`**.
-    *   Edit the resulting `config.json` to set up your LLM provider details (e.g., Ollama host, model name, headers).
+---
 
-2.  **Environment:** The project relies on a virtual environment:
-    *   Create and activate the environment: `python -m venv .venv`
-    *   Activate: `source .venv/bin/activate` (or `.venv\Scripts\activate` on Windows)
+## 🚀 Setup Instructions
 
-3.  **Execution:** For CLI usage, the entry point of the project is `main.py`. Run the main application script:
-    *   `python main.py`
+### 1. Configuration
+Before running the application, you must configure your environment:
+1.  Copy the template file:
+```bash
+cp config.json.dist config.json
+```
+2.  Edit `config.json` with your LLM provider details (host, model name, API keys, etc.).
 
-## 🗣️ Agent Commands
+### 2. Installation
+Using a virtual environment is highly recommended to avoid conflicts with system libraries (especially on **macOS/Homebrew** and modern **Linux** distributions via PEP 668).
 
-The agent is designed to be controlled via specific commands entered at the prompt.
+#### Clone the repository
+```bash
+git clone https://github.com
+cd harnessity
+```
 
-| Command | Description | Usage Example |
+#### Set up a Virtual Environment (Recommended)
+
+**macOS / Linux:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+**Windows:**
+```powershell
+python -m venv .venv
+.venv\(\Scripts\activate \%\%\)MAGIT_PARSER_PROTECT%%
+```
+
+**Note for macOS/Linux users:** If you see an `externally-managed-environment` error, it is because your system protects the global Python installation. Please use the virtual environment method above or install via `pipx`.
+
+#### Install the package
+Once the environment is active, install the package in **editable mode**:
+```bash
+pip install -e .
+```
+This registers the `harnessity` command globally within your environment and installs all required dependencies automatically.
+
+---
+
+## 🗣️ Usage & Commands
+
+Run the tool from any directory in your terminal by simply typing:
+```bash
+harnessity
+```
+The application will process files in your current working directory while correctly accessing its internal resources.
+
+### Agent Commands
+The agent is controlled via specific slash commands entered at the prompt:
+
+
+| Command | Description | Example |
 | :--- | :--- | :--- |
-| **/exit**, **/bye**, or **/quit** | Terminates the agent session and exits the program. | `/exit` |
-| **/clear** | Clears the current message history and resets the session state. | `/clear` |
-| **/context** | Displays the token usage statistics from the previous interaction. | `/context` |
-| **/agent [name] [rest of prompt]** | Loads a predefined agent definition from the `./agents/` folder and sets it as the system instruction. | `/agent MyAgent "What is the capital of France?"` |
+| **/exit**, **/quit** | Terminates the agent session and exits. | `/exit` |
+| **/clear** | Resets the message history and session state. | `/clear` |
+| **/context** | Displays token usage and interaction stats. | `/context` |
+| **/agent [name]** | Loads a predefined agent from `./agents/`. | `/agent Coder "Fix this bug"` |
 
-### 💡 How to Use Commands
+---
 
-When interacting with the agent, start your input with the command prefix:
+## 🛠️ Maintenance & Uninstallation
 
-*   **To exit:** Type `/exit` and press Enter.
-*   **To clear history:** Type `/clear` and press Enter.
-*   **To check context:** Type `/context` and press Enter.
-*   **To load an agent:** Use the `/agent` command followed by the agent's name and the rest of your request.
+**Verify Installation:**
+To check if the dependencies were installed correctly, you can run:
+```bash
+pip check
+```
 
-## 📚 Code Overview
-
-The system is built upon a modular design:
-
-*   **`model.py`**: Manages the connection and communication with the external LLM.
-*   **`agentTools.py`**: Defines the set of built-in functions the agent can invoke to interact with the external environment.
-*   **`agentMCP.py`**: Integrates Model Context Protocol (MCP) to dynamically load tools from external servers.
-*   **`agent.py`**: Implements the core agent logic, including the multi-step reasoning loop and tool execution.
-*   **`main.py`**: Orchestrates the entire process, handling user input and managing the agent lifecycle.
+**Uninstallation:**
+If you wish to remove the command and the package from your system:
+```bash
+pip uninstall harnessity
+```

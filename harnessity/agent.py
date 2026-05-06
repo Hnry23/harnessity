@@ -1,8 +1,8 @@
-from model import Model
-from agentTools import web_search, create_file, read_file, list_folder
-from agentIO import printThinking, printError, printSystem, printResponse
-from config import config
-from agentMCP import executeMCPTool
+from harnessity.model import Model
+from harnessity.agentTools import web_search, create_file, read_file, list_folder
+from harnessity.agentIO import printThinking, printError, printSystem, printResponse
+from harnessity.config import config
+from harnessity.agentMCP import executeMCPTool
 import re
 import os
 
