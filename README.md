@@ -24,7 +24,6 @@ The application is organized into modular components:
 *   `agentTools.py`: Built-in tools (`web_search`, `create_file`, `read_file`, `list_folder`).
 *   `agentMCP.py`: MCP integration for external tool servers.
 *   `config.json.dist`: Template for LLM connections and agent parameters.
-*   `skills/`: Directory for custom skills and context files.
 
 ---
 
