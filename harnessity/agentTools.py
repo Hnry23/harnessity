@@ -89,3 +89,12 @@ def exec_bash_command(command: str, args: str):
     
     result = subprocess.check_output(full_command, shell=True, stderr=subprocess.STDOUT)
     return result.decode('utf-8')
+
+
+# Defined tools
+defined_tools = [
+    web_search,
+    create_file,
+    read_file,
+    list_folder
+]

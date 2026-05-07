@@ -15,6 +15,9 @@ class Agent:
 
     # agent loop
     def agent_loop(self, prompt: str, messages_bag: list = []):
+        if prompt == "":
+            return None, messages_bag
+
         printThinking(f"Agent loop started, please wait...")
 
         # First of all, check if there is any context required (with @)
@@ -58,7 +61,7 @@ class Agent:
                 return None, messages_bag
 
             if config.agent.show_thinking and msg.role == 'assistant':
-                if msg.thinking != '':
+                if msg.thinking != None:
                     printThinking(f"{msg.thinking}")
                     if msg.content != '':
                         printThinking(f"{msg.content}")
@@ -163,16 +166,3 @@ class Agent:
             return system_prompt + recent_context
         return messages_bag
 
-    @staticmethod
-    def set_agent_definition(agent_name: str, messages_bag: list) -> tuple[bool, list]:
-        filename = "./agents/" + agent_name + ".md"
-        if os.path.exists(filename) != True:
-            printError(f"The required agent definition cannot be found: {agent_name}")
-            return False, messages_bag
-        with open(filename, 'r', encoding='utf-8') as f:
-            file_content = f.read()
-            messages_bag.append({
-                "role": "system",
-                "content": file_content
-            })
-        return True, messages_bag
