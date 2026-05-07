@@ -12,19 +12,6 @@
 *   **Contextual Awareness:** Support for loading context from files or specific "skills" to guide the agent.
 *   **Interactive CLI:** A simple and fun command-line interface to manage your sessions and agents.
 
-
-## ⚙️ Project Structure
-
-The application is organized into modular components:
-
-*   `main.py`: Entry point. Initializes the LLM client, the Agent, and the command loop.
-*   `agent.py`: Core logic for the `Agent` class (reasoning loops and tool execution).
-*   `model.py`: Interface for underlying LLMs (e.g., Ollama, OpenAI).
-*   `agentIO.py`: Standardized input/output (UI, errors, and "thinking" states).
-*   `agentTools.py`: Built-in tools (`web_search`, `create_file`, `read_file`, `list_folder`).
-*   `agentMCP.py`: MCP integration for external tool servers.
-*   `config.json.dist`: Template for LLM connections and agent parameters.
-
 ---
 
 ## 🚀 Setup Instructions
