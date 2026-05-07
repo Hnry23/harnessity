@@ -53,6 +53,15 @@ def main():
             match command:
                 case '/exit'|'/bye'|'/quit':
                     break
+                case '/tools':
+                    for tool in defined_tools:
+                        if callable(tool):
+                            printSystem(tool.__name__)
+                        elif isinstance(tool, dict) and 'function' in tool:
+                            printSystem(tool['function']['name'])
+                        else:
+                            printError(f"Wrong tool definition: {tool}")
+                    continue
                 case '/clear':
                     message_history = []
                     last_response = None

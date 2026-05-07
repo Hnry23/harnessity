@@ -40,7 +40,7 @@ class Agent:
                 response = self.model.chat(messages_bag, self.defined_tools)
             except Exception as e:
                 printError(f"Error connecting to the model: {e}")
-                return original_messages_bag
+                return None, original_messages_bag
             
             if hasattr(response, 'message') == False:
                 continue
@@ -66,7 +66,7 @@ class Agent:
             # 3. If end turn or no more tool calls, the agent finished thinking (we break the loop)
             if stop_reason == "end_turn" or not msg.tool_calls:
                 printResponse(msg.content)
-                return None, messages_bag
+                return response, messages_bag
 
             # 4. Process tool calling (mcp and local tools)
             for tool_call in msg.tool_calls:
