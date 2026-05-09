@@ -1,5 +1,5 @@
 from harnessity.model import Model
-from harnessity.agentTools import web_search, create_file, read_file, list_folder
+from harnessity.agentTools import exec_bash_command, web_search, create_file, read_file, list_folder
 from harnessity.agentIO import printThinking, printError, printSystem, printResponse
 from harnessity.config import config
 from harnessity.agentMCP import executeMCPTool
@@ -103,6 +103,8 @@ class Agent:
                     result = create_file(**args)
                 case 'read_file':
                     result = read_file(**args)
+                case 'exec_bash_command':
+                    result = exec_bash_command(**args)
                 case _:
                     result = "Tool not available"
         return messages_bag, result

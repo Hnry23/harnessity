@@ -1,8 +1,9 @@
 # Functions to be used as agent's tools
+import shlex
 import subprocess # To make bash command executions
 from ddgs import DDGS # to make DuckDuckGo searches
-from harnessity.agentIO import printTool, printError, printResponse, inputPrompt
-from harnessity.config import config
+from harnessity.agentIO import printTool, printError, printResponse, inputPrompt, inputQuestionWithAnswers
+from harnessity.config import config, save_config
 
 def log_tool_usage(tool_name: str, message: str):
     if config.tools.show_usage:
@@ -70,26 +71,36 @@ def list_folder(path: str, recursive: bool = False):
     )
     return result.stdout.strip()
 
-def ask_question(question: str) -> str:
+def exec_bash_command(command: str, args: str):
     """
-    Use this tool to ask the user (or the agent that started your chat) for any doubt
-    or confirmation you may need to accomplish your work
+    Use this tool to execute any CLI command. The command must be a single-word (no routes allowed).
+    Use this tool, for example, to make call to git, gh (github CLI command) or Curl, or any other terminal
+    command you might need (it is possible that user will need to authorise the execution)
     """
-    log_tool_usage("ask_question", f"Model asked: {question}")
-    if question == "":
-        return "You need to provide a question when using this tool"
+    # 1. Basic validation
+    command = command.strip()
+    if " " in command or "/" in command:
+        return "Error: The command must be a single word (no routes allowed)."
 
-    user_response = None
+    # 2. Check permissions
+    if is_execution_allowed(command=command) == False:
+        return f"Error: The execution of command '{command}' is not allowed."
 
-    while user_response == None or len(user_response) == 0:
-        printResponse(f"[Question] {question}")
-        user_response = inputPrompt("Response >>> ")
-
-    return user_response
+    # 3. Execution
+    try:
+        arg_list = shlex.split(args)
+        full_call = [command] + arg_list
+        log_tool_usage("exec_bash_command", f"Executing: {' '.join(full_call)}...")
+        result = subprocess.check_output(full_call, stderr=subprocess.STDOUT)
+        return result.decode('utf-8')
+    except subprocess.CalledProcessError as e:
+        return f"Error executing the command: {e.output.decode('utf-8')}"
+    except Exception as e:
+        return f"Unexpected error: {str(e)}"
 
 # not exposed functions
 
-def exec_bash_command(command: str, args: str):
+def exec_bash_command_old(command: str, args: str):
     """
     Execute any bash command
     """
@@ -100,6 +111,27 @@ def exec_bash_command(command: str, args: str):
     result = subprocess.check_output(full_command, shell=True, stderr=subprocess.STDOUT)
     return result.decode('utf-8')
 
+def is_execution_allowed(command: str) -> bool:
+    if command in config.tools.exec.disallowed:
+        return False
+    if command in config.tools.exec.allowed:
+        return True
+    # Ask the user...
+    question = f"Do you want to authorise the execution of command '{command}' (y/n)?"
+    allowed_responses = ['y', 'n']
+    result = inputQuestionWithAnswers(question=question, allowed_responses=allowed_responses)
+
+    value = (result == 'y')
+    setExecAllowed(command=command, value=value)
+
+    return value
+
+def setExecAllowed(command: str, value: bool):
+    if value:
+        config.tools.exec.allowed.append(command)
+    else:
+        config.tools.exec.disallowed.append(command)
+    save_config()
 
 # Defined tools
 defined_tools = [
@@ -107,5 +139,5 @@ defined_tools = [
     create_file,
     read_file,
     list_folder,
-    ask_question
+    exec_bash_command
 ]

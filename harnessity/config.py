@@ -15,6 +15,8 @@ MANDATORY_SETTINGS = [
     "agent.show_thinking",
     "tools.show_usage",
     "tools.websearch_max_results",
+    "tools.exec.allowed",
+    "tools.exec.disallowed",
     "mcp.servers"
 ]
 
@@ -64,6 +66,10 @@ def load_config():
     except Exception as e:
         print(f"❌ Unexpected ERROR loading config: {e}")
         sys.exit(1)
+
+def save_config():
+    #TO-DO
+    return
 
 # Initialize the global config object
 config = load_config()
