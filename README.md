@@ -16,15 +16,7 @@
 
 ## 🚀 Setup Instructions
 
-### 1. Configuration
-Before running the application, you must configure your environment:
-1.  Copy the template file:
-```bash
-cp config.json.dist config.json
-```
-2.  Edit `config.json` with your LLM provider details (host, model name, API keys, etc.).
-
-### 2. Installation
+### 1. Installation
 Using a virtual environment is highly recommended to avoid conflicts with system libraries (especially on **macOS/Homebrew** and modern **Linux** distributions via PEP 668).
 
 #### Clone the repository
@@ -56,6 +48,13 @@ pip install -e .
 ```
 This registers the `harnessity` command globally within your environment and installs all required dependencies automatically.
 
+### 2. Configuration
+Before running the application, you must configure your environment:
+1.  Copy the template file:
+```bash
+cp config.json.dist config.json
+```
+2.  Edit `config.json` with your LLM provider details (host, model name, API keys, etc.).
 ---
 
 ## 🗣️ Usage & Commands
