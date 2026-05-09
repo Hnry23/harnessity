@@ -10,7 +10,8 @@
     "agent": {
         "show_thinking": true,
         "max_messages": 20,
-        "max_loop_iterations": 15
+        "max_loop_iterations": 15,
+        "show_consumption": true
     },
     "tools": {
         "show_usage": true,
@@ -21,9 +22,13 @@
         "servers": [
             {
                 "name": "rag",
-                "protocol": "http",
-                "host": "localhost",
-                "port": 7777
+                "host": "http://localhost:7777/sse",
+                "api_key": ""
+            },
+            {
+                "name": "atlassian",
+                "host": "https://mcp.atlassian.com/v1/sse",
+                "api_key": "your-api-key"
             }
         ]
     }
