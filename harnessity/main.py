@@ -15,7 +15,7 @@ model = Model(
 )
 
 def main():
-    printSystem("\nAI agent\n========\n")
+    printSystem("\nHarnessity\n==========\n")
 
     # MCP tools
     initConfiguredMCP()
