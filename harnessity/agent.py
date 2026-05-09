@@ -11,7 +11,7 @@ class Agent:
     def __init__(self, model: Model, defined_tools: list):
         self.defined_tools = defined_tools
         self.model = model
-        self.client = model.getClient()
+        self.client = model.client
 
     # agent loop
     def agent_loop(self, prompt: str, messages_bag: list = []):
@@ -46,12 +46,13 @@ class Agent:
                 return None, original_messages_bag
             
             if hasattr(response, 'message') == False:
+                print(f"Response: {response}")
                 continue
 
             msg = response.message
-            messages_bag.append(msg) # append always the assistant response
+            messages_bag.append(msg.to_dict()) # append always the assistant response
 
-            # Stop reason handling
+            # 3. Stop reason handling
             stop_reason = getattr(response, 'stop_reason', None)
             if stop_reason == "max_tokens":
                 printError("Warning: Context window or output limit reached (max_tokens).")
@@ -59,19 +60,11 @@ class Agent:
             if stop_reason == "content_filter":
                 printError("Warning: The response was blocked by content filters.")
                 return None, messages_bag
-
-            if config.agent.show_thinking and msg.role == 'assistant':
-                if msg.thinking != None:
-                    printThinking(f"{msg.thinking}")
-                    if msg.content != '':
-                        printThinking(f"{msg.content}")
-
-            # 3. If end turn or no more tool calls, the agent finished thinking (we break the loop)
             if stop_reason == "end_turn" or not msg.tool_calls:
                 printResponse(msg.content)
                 return response, messages_bag
 
-            # 4. Process tool calling (mcp and local tools)
+            # 4. Process tool calling (mcp and local tools) if any
             for tool_call in msg.tool_calls:
                 tool_name = tool_call.function.name
                 args = tool_call.function.arguments

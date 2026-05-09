@@ -1,7 +1,7 @@
 # Functions to be used as agent's tools
 import subprocess # To make bash command executions
 from ddgs import DDGS # to make DuckDuckGo searches
-from harnessity.agentIO import printTool, printError
+from harnessity.agentIO import printTool, printError, printResponse, inputPrompt
 from harnessity.config import config
 
 def log_tool_usage(tool_name: str, message: str):
@@ -75,7 +75,17 @@ def ask_question(question: str) -> str:
     Use this tool to ask the user (or the agent that started your chat) for any doubt
     or confirmation you may need to accomplish your work
     """
-    return "User is not able to respond right now, try a different approach to solve your doubts."
+    log_tool_usage("ask_question", f"Model asked: {question}")
+    if question == "":
+        return "You need to provide a question when using this tool"
+
+    user_response = None
+
+    while user_response == None or len(user_response) == 0:
+        printResponse(f"[Question] {question}")
+        user_response = inputPrompt("Response >>> ")
+
+    return user_response
 
 # not exposed functions
 
@@ -96,5 +106,6 @@ defined_tools = [
     web_search,
     create_file,
     read_file,
-    list_folder
+    list_folder,
+    ask_question
 ]

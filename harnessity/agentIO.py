@@ -16,12 +16,13 @@ def printSystem(message: str):
     print(Fore.MAGENTA + message)
     Fore.RESET
 
-def printThinking(message: str):
-    print(Fore.LIGHTBLACK_EX + message)
+def printThinking(message: str, end='\n', flush=False):
+    print(Fore.LIGHTBLACK_EX + message, end=end, flush=flush)
     Fore.RESET
 
-def printTool(message: str):
-    print(Fore.LIGHTWHITE_EX + message)
+def printTool(tool: str, message: str):
+    print(Fore.LIGHTWHITE_EX + tool + " :: ", end='')
+    printSystem(message)
     Fore.RESET
 
 def inputPrompt() -> str:
