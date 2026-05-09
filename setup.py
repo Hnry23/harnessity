@@ -8,6 +8,7 @@ setup(
         'colorama',
         'ollama',
         'ddgs',
+        'mcp'
     ],
     entry_points={
         'console_scripts': [
