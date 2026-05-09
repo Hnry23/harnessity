@@ -3,3 +3,4 @@ agents
 harnessity/config.json
 harnessity.*
 config.json
+.venv
