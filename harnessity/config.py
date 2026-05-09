@@ -3,7 +3,7 @@ import os
 import sys
 from types import SimpleNamespace
 
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'config.json')
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), '../config.json')
 
 MANDATORY_SETTINGS = [
     "model.host",
