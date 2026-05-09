@@ -6,7 +6,7 @@ from harnessity.config import config
 
 def log_tool_usage(tool_name: str, message: str):
     if config.tools.show_usage:
-        printTool(f"\n[Tool] {tool_name} :: {message}")
+        printTool(f"\n[Tool] {tool_name}", message)
 
 def create_file(file_name: str, content: str):
     """
