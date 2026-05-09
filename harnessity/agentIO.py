@@ -4,7 +4,7 @@ from colorama import Fore, init
 init(autoreset=True)
 
 def printResponse(message: str):
-    print(Fore.BLUE + message)
+    print(Fore.LIGHTGREEN_EX + message)
     Fore.RESET
 
 def printError(message: str):
@@ -26,4 +26,4 @@ def printTool(tool: str, message: str):
     Fore.RESET
 
 def inputPrompt() -> str:
-    return str(input(Fore.YELLOW + ">>> ")).strip()
+    return str(input(Fore.LIGHTYELLOW_EX + ">>> ")).strip()
