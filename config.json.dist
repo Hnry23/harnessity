@@ -15,7 +15,11 @@
     },
     "tools": {
         "show_usage": true,
-        "websearch_max_results": 5
+        "websearch_max_results": 5,
+        "exec": {
+            "allowed": [],
+            "disallowed": []
+        }
     },
     "mcp": {
         "show_usage": true,
