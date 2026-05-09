@@ -73,6 +73,7 @@ The agent is controlled via specific slash commands entered at the prompt:
 | :--- | :--- | :--- |
 | **/exit**, **/quit** | Terminates the agent session and exits. | `/exit` |
 | **/clear** | Resets the message history and session state. | `/clear` |
+| **/tools** | List the available tools (including MCP tools, if any). | `/tools` |
 | **/context** | Displays token usage and interaction stats. | `/context` |
 | **/agent [name]** | Loads a predefined agent from `./agents/`. | `/agent Coder "Fix this bug"` |
 
