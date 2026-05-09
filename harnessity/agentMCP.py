@@ -1,3 +1,5 @@
+import base64
+
 from harnessity.config import config
 from harnessity.agentIO import printTool, printError
 
@@ -11,9 +13,8 @@ def initConfiguredMCP():
     for mcp_item in config.mcp.servers:
         configured_mcps[mcp_item['name']] = MCPInstance(
             name=mcp_item['name'],
-            protocol=mcp_item['protocol'],
             host=mcp_item['host'],
-            port=mcp_item['port']
+            api_key=mcp_item['api_key']
         )
 
 def getMCPTools() -> list:
@@ -44,17 +45,22 @@ def logMCPUsage(mcp_name: str, tool_name: str, message: str):
 
 class MCPInstance:
     name: str
-    protocol: str
     host: str
-    port: int
-    url: str
+    api_key: str
 
-    def __init__(self, name: str, protocol: str, host: str, port: int):
+    def __init__(self, name: str, host: str, api_key: str):
         self.name = name
-        self.protocol = protocol
         self.host = host
-        self.port = port
-        self.url = f'{self.protocol}://{self.host}:{self.port}/sse'
+        self.api_key = api_key
+
+    def get_headers(self) -> str:
+        headers = {}
+        if self.api_key != "":
+            auth_bytes = f"hnry23@gmail.com:{self.api_key}".encode("utf-8")
+            auth_b64 = base64.b64encode(auth_bytes).decode("utf-8")
+            headers["Authorization"] = f"Basic {auth_b64}"
+            headers["Content-Type"] = "application/json"
+        return headers
 
     def tools(self) -> list:
         tools = []
@@ -73,7 +79,7 @@ class MCPInstance:
     
     async def retrieve_tools(self):
         tools = []
-        async with sse_client(self.url) as (read, write):
+        async with sse_client(self.host, headers=self.get_headers()) as (read, write):
             async with ClientSession(read, write) as session:
                 # Init connection
                 await session.initialize()
@@ -84,7 +90,7 @@ class MCPInstance:
         return tools
     
     async def call_tool(self, tool_name: str, arguments: dict):
-        async with sse_client(self.url) as (read, write):
+        async with sse_client(self.host, headers=self.get_headers()) as (read, write):
             async with ClientSession(read, write) as session:
                 await session.initialize()
                 # call
